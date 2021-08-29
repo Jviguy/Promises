@@ -10,6 +10,11 @@ class Promise
 
     private PromiseThread $thread;
 
+    /**
+     * Creates a new promise that
+     *
+     * @param callable $fn - the callable to be run on another thread.
+     */
     public function __construct(callable $fn) {
         $notifier = new SleeperNotifier();
         Server::getInstance()->getTickSleeper()->addNotifier($notifier, function() : void{
@@ -24,14 +29,30 @@ class Promise
     /** @var callable[] $catchers - the given callbacks that are catching errors */
     private array $catchers = [];
 
+    /**
+     * Adds a new successful callback to this promise
+     *
+     * @param callable $fn - the given callback to be run when this promise is successfully resolved
+     */
     public function then(callable $fn) {
         $this->callstack[] = $fn;
     }
 
+
+    /**
+     * Adds a new refused callback to this promise
+     *
+     * @param callable $fn - the given callback to be run when this promise fails to resolve.
+     */
     public function catch(callable $fn) {
     	$this->catchers[] = $fn;
 	}
 
+    /**
+     * called when the given thread is finished running should never be called on the calling thread.
+     *
+     * @internal
+     */
     public function handle() {
         if ($this->thread->errored) {
             foreach ($this->catchers as $catcher) {
