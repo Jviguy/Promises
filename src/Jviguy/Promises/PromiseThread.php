@@ -21,7 +21,7 @@ class PromiseThread extends Thread
 
     public function __construct(callable $fn, private SleeperNotifier $notifier) {
         $this->fn = $fn;
-		$this->start();
+	$this->start();
     }
 
     protected function onRun(): void
