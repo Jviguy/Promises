@@ -29,6 +29,9 @@ class Promise
     /** @var callable[] $catchers - the given callbacks that are catching errors */
     private array $catchers = [];
 
+    /** @var callable[] $finals - the callbacks that will run no matter the result */
+    private array $finals = [];
+
     /**
      * Adds a new successful callback to this promise
      *
@@ -36,6 +39,14 @@ class Promise
      */
     public function then(callable $fn) {
         $this->callstack[] = $fn;
+    }
+
+    /**
+     * @param callable $fn
+     * Runs after the promise returns, no matter the result
+     */
+    public function finally(callable $fn){
+        $this->finals[] = $fn;
     }
 
 
@@ -63,6 +74,9 @@ class Promise
             foreach ($this->callstack as $c) {
                 $c($this->thread->ret);
             }
+        }
+        foreach($this->finals as $f){
+            $f($this->thread->ret, $this->thread->error);
         }
     }
 }
